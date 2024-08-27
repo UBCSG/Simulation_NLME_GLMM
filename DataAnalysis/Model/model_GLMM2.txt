@@ -1,0 +1,16 @@
+
+[LONGITUDINAL]
+input = {gamma0, gamma1, gamma2, gamma3, CD4_st}
+
+CD4_st = {use = regressor}
+
+EQUATION:
+lp1 = gamma0 + gamma1 * t + gamma2 * CD4_st + gamma3 * t^2
+
+DEFINITION:
+Level = {type=categorical, categories={0,1}
+    logit(P(Level=1)) = lp1
+}
+
+OUTPUT:
+output = {Level}

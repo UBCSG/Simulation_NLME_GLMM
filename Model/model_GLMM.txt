@@ -1,0 +1,17 @@
+
+[LONGITUDINAL]
+input = {alpha0, alpha1}
+
+
+
+EQUATION:
+Y =  alpha0 + alpha1 * t
+
+DEFINITION:
+Level = {type=categorical, categories={0,1}
+    logit(P(Level=1)) = Y
+}
+
+OUTPUT:
+output = {Level}
+

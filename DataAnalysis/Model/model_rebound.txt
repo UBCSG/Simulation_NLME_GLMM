@@ -1,0 +1,11 @@
+
+[LONGITUDINAL]
+input = {beta1, beta2, beta3, beta4}
+
+
+EQUATION:
+Y =  beta1 * t / (t  + exp( beta2 - beta3 * t)) + beta4 
+
+OUTPUT:
+output = {Y}
+
