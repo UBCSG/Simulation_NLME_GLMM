@@ -12,7 +12,7 @@ sapply(file.sources, source)
 # Default values: p1 = 17, lambda1 = 4, p2 = 3, D = diag(c(2, 0.1, 0.1)), sigma1 = 0.1, 
 # time = c(0.5, 1.67, 3, 4.6, 6), num_sim = 500, num_patient = 20.
 SimFunDecay(p1 = 17, lambda1 = 4, p2 = 3, D = diag(c(2, 0.1, 0.1)),
-            sigma1 = 0.1, time = c(0.5, 1.67, 3, 4.6, 6), num_sim = 500, num_patient = 20)
+            sigma = 0.1, time = c(0.5, 1.67, 3, 4.6, 6), num_sim = 500, num_patient = 20)
 
 
 ##=====================Simulation of Rebound Model=======================
@@ -23,7 +23,13 @@ SimFunDecay(p1 = 17, lambda1 = 4, p2 = 3, D = diag(c(2, 0.1, 0.1)),
 # B = diag(c(0.2, 0, 0.1, 0, 0)), sigma = 0.1, time = c(0.5, 2.9, 4.8, 7, 10.2), num_sim = 500, num_patient = 50.
 SimFunRebound(beta1 = 4, beta2 = 5.7, beta3 = 2.1, beta4 = 1.9, beta5 = 0.4, 
                B = diag(c(0.2, 0.1, 0.1, 0, 0)), sigma = 0.1, 
-               time = c(0.5, 2.9, 4.8, 7, 10.2), num_sim = 50, num_patient = 50)
+               time = c(0.5, 2.9, 4.8, 7, 10.2), num_sim = 5, num_patient = 50)
 
+
+##=====================Simulation of GLMM=======================
+# GLMM: logit(y_ij) = (alpha_0 + a_{0i}) + (alpha_1 + a_{1i}) * t_{ij} + (alpha_2 + a_{2i}) * x_{ij}, 
+# where x_{ij} ~ N(0, 1) is a covariate, and a_i ~ N(0, A) with diagonal elements being A11, A22, and A33.
+SimFunGLMM(alpha0_t = 8, alpha1_t = -2, alpha2_t = 2, A = diag(c(2, 0.5, 0)),
+           time = c(0.5, 1.67, 3, 4.6, 6), num_sim = 20, num_patient = 50)
 
 

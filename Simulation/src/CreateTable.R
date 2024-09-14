@@ -1,8 +1,13 @@
-CreateResultTable <- function(num_sim, TrueValue, TrueCov, Cov_names, TrueSigma, EstTable, SETable, CovTable, SigmaTable, TimeTable) {
+CreateResultTable <- function(num_sim, TrueValue, TrueCov, TrueSigma, EstTable, SETable, CovTable, SigmaTable, TimeTable) {
   randef <- which(diag(TrueCov) != 0)
   
   all_parameters <- c(TrueValue, diag(TrueCov)[randef], TrueSigma)
-  estimates_all <- cbind(EstTable, CovTable, SigmaTable)
+  estimates_all <- if (!is.null(SigmaTable)) {
+    cbind(EstTable, CovTable, SigmaTable)
+  } else {
+    cbind(EstTable, CovTable)
+  }
+  
   # In case of any non-convergence, number of valid simulation iteration is
   num_iter <- nrow(EstTable)
   # CI_SAEM is a data frame containing boolean, TRUE is the estimate is within 95% CI, FALSE otherwise.
@@ -23,15 +28,20 @@ CreateResultTable <- function(num_sim, TrueValue, TrueCov, Cov_names, TrueSigma,
   Coverage <- sapply(CI_table, function(x) mean(x, na.rm = TRUE))
   result <- cbind(true_value = all_parameters, 
                   estimates = sapply(estimates_all, mean), 
-                  se_m = c(sapply(SETable, function(x) mean(x, na.rm = TRUE)), rep(NA, length(randef) + 1)), # model SE
+                  se_m = c(sapply(SETable, function(x) mean(x, na.rm = TRUE)), rep(NA, length(all_parameters) - length(TrueValue))), # model SE
                   se_s = sapply(estimates_all, sd), # simulation SE
                   rMSE, # %rMSE
                   bias, # bias
                   bias_perc, # %bias
-                  CP = c(Coverage, rep(NA, length(randef) + 1)), # 95% CI coverage rate
-                  NC = c(num_sim - num_iter, rep(NA, length(randef) + 5)), # number of non-convergence
-                  time = c(sum(TimeTable), rep(NA, length(randef) + 5))) # total computation time
-  rownames(result) = c("beta1", "beta2", "beta3", "beta4", "beta5", Cov_names, "sigma")
+                  CP = c(Coverage, rep(NA, length(all_parameters) - length(TrueValue))), # 95% CI coverage rate
+                  NC = c(num_sim - num_iter, rep(NA, length(all_parameters) - 1)), # number of non-convergence
+                  time = c(sum(TimeTable), rep(NA, length(all_parameters) - 1))) # total computation time
+  rownames(result) = if (!is.null(SigmaTable)) {
+    c(colnames(EstTable), colnames(CovTable), "sigma")
+  } else {
+    c(colnames(EstTable), colnames(CovTable))
+  }
+  
   as.data.frame(result)
 }
 
@@ -39,12 +49,20 @@ CreateLatexTable <- function(resultTable, ParameterName, CovName, SigmaName) {
   table_names <- c("Method", "Time (s)", "NC", "Parameter", "True Value", "Estimate", 
                    "SE_M", "SE_S", "Bias (%)", "rMSE (%)", "Coverage")
   
-  table <- data.frame(matrix(nrow = 3*(length(CovName)+6), ncol = length(table_names)))
+  table <- data.frame(matrix(nrow = nrow(resultTable), ncol = length(table_names)))
   colnames(table) <- table_names
 
-  table$Parameter <- rep(c(ParameterName, CovName, SigmaName), 3)
+  num_method = sum(!is.na(resultTable$NC))
+  table$Parameter <- rep(c(ParameterName, CovName, SigmaName), num_method)
   table$`True Value` <- resultTable$true_value
-  table$Method <- c("SAEM", rep(NA, length(CovName) + 5), "NLME", rep(NA, length(CovName) + 5), "LME4", rep(NA, length(CovName) + 5))
+  table$Method <- if (num_method == 3){
+    c("SAEM", rep(NA, length(CovName) + length(ParameterName)), 
+      "NLME", rep(NA, length(CovName) + length(ParameterName)), 
+      "LME4", rep(NA, length(CovName) + length(ParameterName)))
+  } else{
+    c("SAEM", rep(NA, length(CovName) + length(ParameterName) - 1), 
+      "LME4", rep(NA, length(CovName) + length(ParameterName) - 1))
+  }
   table$Estimate <- resultTable$estimates
   table$SE_M <- resultTable$se_m
   table$SE_S <- resultTable$se_s

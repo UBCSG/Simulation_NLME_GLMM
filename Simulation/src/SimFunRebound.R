@@ -6,7 +6,7 @@
 ##=====================Setting======================
 SimFunRebound <- function(beta1_t = 4, beta2_t = 5.7, beta3_t = 2.1, beta4_t = 1.9, beta5_t = 0.4,
                           B = diag(c(0.2, 0, 0.1, 0, 0)), sigma = 0.1, 
-                          time = c(0.5, 2.9, 4.8, 7, 10.2), num_sim = 20, num_patient = 50) {
+                          time = c(0.5, 2.9, 4.8, 7, 10.2), num_sim = 500, num_patient = 50) {
   
   # Find which parameter has a random effect
   B_diag <<- which(diag(B) != 0)
@@ -29,21 +29,22 @@ SimFunRebound <- function(beta1_t = 4, beta2_t = 5.7, beta3_t = 2.1, beta4_t = 1
   colnames(SE_SAEM) <- colnames(SE_NLME) <- colnames(SE_LME4) <- c("beta1", "beta2", "beta3", "beta4", "beta5")
   # Variance of random effects
   B_SAEM <- B_NLME <- B_LME4 <- data.frame(matrix(nrow = num_sim, ncol = length(B_diag)))
-  B_names <- c()
-  for (i in 1:length(B_diag)){
-    B_names[i] = paste("B", B_diag[i], B_diag[i], sep = "")
-  }
-  colnames(B_SAEM) <- colnames(B_NLME) <- colnames(B_LME4) <- B_names
   # Residual SD (sigma2)
   sigma_SAEM <- sigma_NLME <- sigma_LME4 <- c(rep(NA, num_sim))
   # Computation time
   time_SAEM <- time_NLME <- time_LME4 <- c(rep(NA, num_sim))
   
+  B_names <- c()
+  for (i in 1:length(B_diag)){
+    B_names[i] = paste("B", B_diag[i], B_diag[i], sep = "")
+  }
+  colnames(B_SAEM) <- colnames(B_NLME) <- colnames(B_LME4) <- B_names
+  
   for (i in 1:num_sim) {
     # Print the iteration number
     print(glue::glue("i=", i))
     
-    # Simulate dataset for viral load before ART interruption
+    # Simulate dataset for viral load after ART interruption
     # Create a vector 'PATIENT' where each patient ID is repeated for each time point
     PATIENT <- rep(1:num_patient, each = length(time))
     # Create a vector 'day' that repeats the time points for each patient
@@ -51,7 +52,7 @@ SimFunRebound <- function(beta1_t = 4, beta2_t = 5.7, beta3_t = 2.1, beta4_t = 1
     # Combine the 'PATIENT' and 'day' vectors into a matrix 'data'
     data <- cbind(PATIENT, day)
     
-    #simulate b_i and e_ij
+    # Simulate b_i and e_ij
     bi_sim <- mvrnorm(num_patient, c(0, 0, 0, 0, 0), B)
     colnames(bi_sim) = c("b1_sim", "b2_sim", "b3_sim", "b4_sim", "b5_sim")
     bi_sim <- cbind(PATIENT = c(1:num_patient), bi_sim)
@@ -104,6 +105,8 @@ SimFunRebound <- function(beta1_t = 4, beta2_t = 5.7, beta3_t = 2.1, beta4_t = 1
     B_rand <- diag(B) != 0
     setIndividualParameterVariability(beta1 = B_rand[1], beta2 = B_rand[2], 
                                       beta3 = B_rand[3], beta4 = B_rand[4], beta5 = B_rand[5])
+
+    # Set the population parameter information
     setPopulationParameterInformation(beta1_pop = list(initialValue = beta1_t),
                                       beta2_pop = list(initialValue = beta2_t),
                                       beta3_pop = list(initialValue = beta3_t),
@@ -198,30 +201,18 @@ SimFunRebound <- function(beta1_t = 4, beta2_t = 5.7, beta3_t = 2.1, beta4_t = 1
     write.csv(files[[i]], file = paste0("Simulation/", folder.name, "/Results/", names(files)[i], ".csv"), row.names = FALSE)
   }
   
-  # Specify the directory where the CSV files are stored
-  folder_path <- here::here(file.path("Simulation", folder.name, "Results"))
-  
-  # List all CSV files in the directory
-  csv_files <- list.files(path = folder_path, pattern = "\\.csv$", full.names = TRUE)
-  
-  # Import each CSV file and assign it to a variable with the same name as the file
-  lapply(csv_files, function(file) {
-    file_name <- tools::file_path_sans_ext(basename(file))
-    assign(file_name, read.csv(file), envir = .GlobalEnv)
-  })
-  
   #======================Calculate MSE and bias===================
   true_value <- c(beta1_t, beta2_t, beta3_t, beta4_t, beta5_t)
   all_parameters <- c(true_value, diag(B)[B_diag], sigma)
   
   # Results table for SAEM
-  result_SAEM <- CreateResultTable(num_sim, true_value, B, B_names, sigma, files$estimates_SAEM, files$SE_SAEM, files$B_SAEM, files$sigma_SAEM, files$time_SAEM)
+  result_SAEM <- CreateResultTable(num_sim, true_value, B, sigma, files$estimates_SAEM, files$SE_SAEM, files$B_SAEM, files$sigma_SAEM, files$time_SAEM)
 
   # Results table for NLME
-  result_NLME <- CreateResultTable(num_sim, true_value, B, B_names, sigma, files$estimates_NLME, files$SE_NLME, files$B_NLME, files$sigma_NLME, files$time_NLME)
+  result_NLME <- CreateResultTable(num_sim, true_value, B, sigma, files$estimates_NLME, files$SE_NLME, files$B_NLME, files$sigma_NLME, files$time_NLME)
 
   # Results table for LME4
-  result_LME4 <- CreateResultTable(num_sim, true_value, B, B_names, sigma, files$estimates_LME4, files$SE_LME4, files$B_LME4, files$sigma_LME4, files$time_LME4)
+  result_LME4 <- CreateResultTable(num_sim, true_value, B, sigma, files$estimates_LME4, files$SE_LME4, files$B_LME4, files$sigma_LME4, files$time_LME4)
 
   resultTable <- rbind(result_SAEM, result_NLME, result_LME4)
   
@@ -233,16 +224,16 @@ SimFunRebound <- function(beta1_t = 4, beta2_t = 5.7, beta3_t = 2.1, beta4_t = 1
   table <- CreateLatexTable(resultTable, 
                             ParameterName = c("$\\beta_1$", "$\\beta_2$", "$\\beta_3$", "$\\beta_4$", "$\\beta_5$"), 
                             CovName = B_latex, 
-                            SigmaName = "$\\sigma_1$")
+                            SigmaName = "$\\sigma_2$")
 
   write.csv(table, file = paste0("Simulation/", folder.name, "/table.csv"), row.names = FALSE, na = "")
   
   latex_table <- xtable(table, type = "latex", align = c("cccccccccccc"))
   digits(latex_table) <- c(0, 2, 1, 0, 1, 1, 2, 2, 2, 2, 2, 2)
-  latex_table
+
   print(latex_table,
         file = paste0("Simulation/", folder.name, "/table.tex"),
         include.rownames = FALSE,
         sanitize.text.function = function(x) {x},
-        hline.after = c(-1, 0, 3 * (length(B_diag) + 6)))
+        hline.after = c(-1, 0, 3 * (length(all_parameters))))
 }
