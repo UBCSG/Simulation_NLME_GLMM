@@ -1,11 +1,14 @@
 library(ggplot2)
+library(tidyverse)
 data.decay <- read.csv("DataAnalysis/Data/Cleaned_Data/decay2.csv")
 data.GLMM <- read.csv("DataAnalysis/Data/Cleaned_Data/GLMM2.csv")
 data.decay <- data.decay %>% 
   mutate(censor = ifelse(log10 == min(log10), 1, 0)) %>% 
   filter(! ((PATIENT == 26 & time > 13) | (PATIENT == 71 & time > 22.3)))
 
-p1 <- ggplot(data.decay, aes(x=time, y=log10)) + 
+data.10days <- data.decay %>% 
+  filter(time <= 10)
+p1 <- ggplot(data.10days, aes(x=time, y=log10)) + 
   geom_point(aes(shape=factor(censor)),size=2, stroke=0) +
   geom_line(aes(group=PATIENT)) +
   scale_x_continuous("Day") + 

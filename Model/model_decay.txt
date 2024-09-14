@@ -1,11 +1,11 @@
 
 [LONGITUDINAL]
-input = {p1,b1,p2}
+input = {p1,lambda1,p2}
 
 
 
 EQUATION:
-Y =  log10( exp(p1-b1*t) + exp(p2))
+Y =  log10( exp(p1-lambda1*t) + exp(p2))
 
 
 OUTPUT:

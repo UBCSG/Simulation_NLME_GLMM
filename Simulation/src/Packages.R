@@ -1,0 +1,12 @@
+# Packages required
+library(lixoftConnectors)
+library(mvtnorm)
+library(nlme)
+library(saemix)
+library(tidyverse)
+library(lme4)
+library(MASS)
+library(xtable)
+library(berryFunctions)
+library(kableExtra)
+initializeLixoftConnectors(software="monolix")
