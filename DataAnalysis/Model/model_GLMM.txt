@@ -1,10 +1,11 @@
 
 [LONGITUDINAL]
-input = {gamma0, gamma1}
+input = {alpha0, alpha1, alpha2, alpha3, CD4_st}
 
+CD4_st = {use = regressor}
 
 EQUATION:
-lp1 = gamma0 + gamma1 * t + gamma2 *
+lp1 = alpha0 + alpha1 * t + alpha2 * CD4_st + alpha3 * t^2
 
 DEFINITION:
 Level = {type=categorical, categories={0,1}
@@ -13,4 +14,3 @@ Level = {type=categorical, categories={0,1}
 
 OUTPUT:
 output = {Level}
-
