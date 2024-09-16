@@ -96,7 +96,7 @@ SimFunGLMM <- function(alpha0_t = 8, alpha1_t = -2, alpha2_t = 2, A = diag(c(2, 
     # Store the estimates in table
     estimates_SAEM[i, ] <- getEstimatedPopulationParameters()[1:3]
     SE_SAEM[i, ] <- getEstimatedStandardErrors()$stochasticApproximation[1:3, 2]
-    A_SAEM[i, ] <- getEstimatedPopulationParameters()[4:(3+length(A_diag))]
+    A_SAEM[i, ] <- (getEstimatedPopulationParameters()[4:(3+length(A_diag))])^2
     end.time <- Sys.time()
     time_SAEM[i] <- end.time - start.time
     

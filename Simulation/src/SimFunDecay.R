@@ -116,7 +116,7 @@ SimFunDecay <- function(p1_t = 17, lambda1_t = 4, p2_t = 3, D = diag(c(2, 0.1, 0
     # Store the estimates in table
     estimates_SAEM[i, ] <- getEstimatedPopulationParameters()[c(1, 3, 2)]
     SE_SAEM[i, ] <- getEstimatedStandardErrors()$stochasticApproximation[c(1, 3, 2), 2]
-    D_SAEM[i, ] <- getEstimatedPopulationParameters()[4: (length(D_diag)+3)] 
+    D_SAEM[i, ] <- (getEstimatedPopulationParameters()[4: (length(D_diag)+3)]) ^ 2
     sigma_SAEM[i] <- tail(getEstimatedPopulationParameters(), 1)
     end.time <- Sys.time()
     time_SAEM[i] <- end.time - start.time

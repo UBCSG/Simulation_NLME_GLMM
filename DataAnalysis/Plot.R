@@ -1,7 +1,7 @@
 library(ggplot2)
 library(tidyverse)
-data.decay <- read.csv("Data/Cleaned_Data/decay.csv")
-data.GLMM <- read.csv("Data/Cleaned_Data/GLMM.csv")
+data.decay <- read.csv("DataAnalysis/Data/Cleaned_Data/decay.csv")
+data.GLMM <- read.csv("DataAnalysis/Data/Cleaned_Data/GLMM.csv")
 data.decay <- data.decay %>% 
   mutate(censor = ifelse(log10 == min(log10), 1, 0)) %>% 
   filter(! ((PATIENT == 26 & time > 13) | (PATIENT == 71 & time > 22.3)))

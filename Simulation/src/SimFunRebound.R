@@ -122,7 +122,7 @@ SimFunRebound <- function(beta1_t = 4, beta2_t = 5.7, beta3_t = 2.1, beta4_t = 1
     estimates_SAEM[i, 1:5] <- getEstimatedPopulationParameters()[1:5]
     SE_SAEM[i, ] <- getEstimatedStandardErrors()$stochasticApproximation[1:5, 2]
     sigma_SAEM[i] <- tail(getEstimatedPopulationParameters(), 1)
-    B_SAEM[i, ] <- getEstimatedPopulationParameters()[6:(5+length(B_diag))]
+    B_SAEM[i, ] <- (getEstimatedPopulationParameters()[6:(5+length(B_diag))])^2
     end.time <- Sys.time()
     time_SAEM[i] <- end.time - start.time
     
